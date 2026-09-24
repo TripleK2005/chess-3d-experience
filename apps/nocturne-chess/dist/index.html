@@ -619,6 +619,121 @@
     }
     const stars = addStars();
 
+    function glowMaterial(color, intensity = 1.6) {
+      return new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: intensity,
+        roughness: .42,
+        metalness: .08
+      });
+    }
+
+    function addSolarSystem() {
+      const system = new THREE.Group();
+      system.position.set(-2.2, 1.6, -14.5);
+      system.scale.setScalar(.92);
+      system.rotation.x = -.16;
+
+      const sun = new THREE.Mesh(new THREE.SphereGeometry(.56, 28, 20), glowMaterial(0xffb45f, 2.8));
+      system.add(sun);
+      const sunLight = new THREE.PointLight(0xffa84c, 18, 15, 2);
+      system.add(sunLight);
+
+      const specs = [
+        [.92, .09, 0x8d949f, 1.55],
+        [1.28, .13, 0xd39b68, 1.12],
+        [1.72, .15, 0x4b89c8, .84],
+        [2.15, .12, 0xb95a41, .68],
+        [2.72, .27, 0xc99d72, .37],
+        [3.4, .22, 0xd4bd87, .28]
+      ];
+      const pivots = [];
+      specs.forEach(([radius, size, color, speed], index) => {
+        const orbit = new THREE.Mesh(
+          new THREE.TorusGeometry(radius, .008, 6, 96),
+          new THREE.MeshBasicMaterial({ color: 0x6f829f, transparent: true, opacity: .26, depthWrite: false })
+        );
+        orbit.rotation.x = Math.PI / 2;
+        system.add(orbit);
+        const pivot = new THREE.Group();
+        pivot.rotation.y = index * 1.07;
+        const planet = new THREE.Mesh(new THREE.SphereGeometry(size, 18, 12), glowMaterial(color, .34));
+        planet.position.x = radius;
+        pivot.add(planet);
+        if (index === 5) {
+          const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(size * 1.65, .025, 7, 36),
+            new THREE.MeshBasicMaterial({ color: 0xe3cf9b, transparent: true, opacity: .72, depthWrite: false })
+          );
+          ring.position.x = radius;
+          ring.rotation.x = Math.PI / 2.7;
+          pivot.add(ring);
+        }
+        system.add(pivot);
+        pivots.push({ pivot, speed });
+      });
+      scene.add(system);
+      return { system, sun, pivots };
+    }
+
+    function addConstellation(points, color, position, scale = 1) {
+      const group = new THREE.Group();
+      const vectors = points.map(([x, y]) => new THREE.Vector3(x * scale, y * scale, 0));
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(vectors),
+        new THREE.LineBasicMaterial({ color, transparent: true, opacity: .42, depthWrite: false })
+      );
+      const dots = new THREE.Points(
+        new THREE.BufferGeometry().setFromPoints(vectors),
+        new THREE.PointsMaterial({ color, size: .13, transparent: true, opacity: .95, depthWrite: false })
+      );
+      group.add(line, dots);
+      group.position.set(...position);
+      scene.add(group);
+      return { group, line, dots };
+    }
+
+    const constellations = [
+      addConstellation([[-1.6,.1],[-.9,.55],[-.2,.3],[.45,.82],[1.1,.5],[1.55,1.02]], 0x8ed6ff, [-9.2, 2.5, -15.5], .9),
+      addConstellation([[-1.2,.9],[-.65,.1],[0,.55],[.7,-.15],[1.25,.35],[.55,1.02],[-.15,.55]], 0xd8bdff, [7.2, 2.2, -16], .82),
+      addConstellation([[-1.4,.35],[-.62,.75],[.05,.12],[.72,.6],[1.38,.16]], 0xffd58c, [1.2, 4.2, -17], .72)
+    ];
+
+    function addComet() {
+      const comet = new THREE.Group();
+      const head = new THREE.Mesh(new THREE.SphereGeometry(.11, 14, 10), glowMaterial(0xaeeaff, 3.2));
+      comet.add(head);
+      const tailPoints = [];
+      for (let i = 0; i < 18; i++) tailPoints.push(new THREE.Vector3(i * .17, i * .035, 0));
+      const tail = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(tailPoints),
+        new THREE.LineBasicMaterial({ color: 0x8bdcff, transparent: true, opacity: .68, depthWrite: false })
+      );
+      comet.add(tail);
+      comet.position.set(-9, 4.2, -15);
+      comet.rotation.z = -.35;
+      scene.add(comet);
+      return comet;
+    }
+    const comet = addComet();
+
+    function addMeteor(index) {
+      const meteor = new THREE.Group();
+      const streak = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(1.8,.85,0)]),
+        new THREE.LineBasicMaterial({ color: index % 2 ? 0xffd39a : 0x9de8ff, transparent: true, opacity: .74, depthWrite: false })
+      );
+      const head = new THREE.Mesh(new THREE.SphereGeometry(.045, 9, 7), glowMaterial(index % 2 ? 0xffb878 : 0xa9ecff, 2.4));
+      meteor.add(streak, head);
+      meteor.userData.phase = index * 4.1;
+      meteor.position.set(-11 + index * 7, 4.5 + index * .4, -14 - index * 2);
+      scene.add(meteor);
+      return meteor;
+    }
+    const meteors = [0, 1, 2].map(addMeteor);
+    const solarSystem = addSolarSystem();
+
     const whiteMat = new THREE.MeshPhysicalMaterial({ color: 0xeadfca, roughness: .22, metalness: .12, clearcoat: .55, clearcoatRoughness: .18 });
     const blackMat = new THREE.MeshPhysicalMaterial({ color: 0x172330, roughness: .2, metalness: .72, clearcoat: .65, clearcoatRoughness: .16 });
 
@@ -1328,6 +1443,25 @@
         astrolabe.rotation.y += delta * .08;
         tiltedOrbit.rotation.z += delta * .035;
         stars.rotation.y += delta * .0025;
+        solarSystem.system.rotation.y += delta * .025;
+        solarSystem.sun.rotation.y += delta * .18;
+        solarSystem.pivots.forEach(({ pivot, speed }) => { pivot.rotation.y += delta * speed * .22; });
+        const cometTime = now * .000085;
+        comet.position.set(Math.sin(cometTime) * 11, 4.1 + Math.sin(cometTime * 2) * .9, -15 + Math.cos(cometTime) * 3.5);
+        comet.rotation.z = Math.atan2(Math.cos(cometTime * 2) * 2.6, Math.cos(cometTime) * 11) + Math.PI;
+        meteors.forEach((meteor, index) => {
+          const cycle = (now * .000055 + index * .31) % 1;
+          const flight = cycle / .32;
+          meteor.visible = cycle < .32;
+          meteor.position.set(-13 + flight * 27, 5.8 - flight * 3.3 + index * .45, -14 - index * 2.4);
+          meteor.materialOpacity = Math.sin(Math.min(1, flight) * Math.PI);
+          meteor.children.forEach(child => { if (child.material) child.material.opacity = .78 * Math.sin(Math.min(1, flight) * Math.PI); });
+        });
+        const twinkle = .52 + Math.sin(now * .0017) * .18;
+        constellations.forEach(({ line, dots }, index) => {
+          line.material.opacity = .2 + twinkle * .18;
+          dots.material.opacity = .68 + Math.sin(now * .0015 + index * 1.8) * .22;
+        });
         tealLight.position.x = Math.cos(now * .00022) * 7;
         tealLight.position.z = Math.sin(now * .00022) * 7;
         avatarActors.white.position.y = avatarActors.white.userData.baseY + Math.sin(now * .0013) * .014;
