@@ -58,8 +58,8 @@
       backdrop-filter: blur(10px); transition: opacity .2s ease, transform .2s ease;
     }
     .player.active { transform: translateY(-4px); }
-    .player.white { left: clamp(18px, 2.6vw, 34px); bottom: 112px; color: var(--magnus); }
-    .player.black { right: clamp(18px, 2.6vw, 34px); top: 98px; color: var(--hikaru); text-align: right; }
+    .player.white { right: clamp(18px, 2.6vw, 34px); top: 98px; color: var(--magnus); text-align: right; }
+    .player.black { left: clamp(18px, 2.6vw, 34px); bottom: 112px; color: var(--hikaru); }
     .player-name { color: var(--paper); font-weight: 700; font-size: 1rem; }
     .player-meta { color: var(--muted); font-size: .78rem; margin-top: 2px; }
     .clock-state { margin-top: 8px; font-variant-numeric: tabular-nums; font-size: .75rem; color: currentColor; }
@@ -129,8 +129,8 @@
       .result-chip { padding: 7px 9px; font-size: .8rem; }
       .site-switch { top: 70px; right: 12px; padding: 8px 10px; }
       .player { width: calc(50vw - 22px); padding: 9px 10px; }
-      .player.white { left: 12px; bottom: 86px; }
-      .player.black { right: 12px; top: auto; bottom: 86px; }
+      .player.white { right: 12px; left: auto; top: auto; bottom: 86px; text-align: right; }
+      .player.black { left: 12px; right: auto; top: auto; bottom: 86px; text-align: left; }
       .player-name { font-size: .86rem; }
       .player-meta { display: none; }
       .timeline, .timeline-toggle, .clock-note { display: none; }
