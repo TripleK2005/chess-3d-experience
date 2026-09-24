@@ -495,6 +495,9 @@
 
     const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 100);
     camera.position.set(11.8, 11.2, 12.4);
+    scene.add(camera);
+    const celestialRig = new THREE.Group();
+    camera.add(celestialRig);
 
     const controls = new OrbitControls(camera, canvas);
     controls.enableDamping = true;
@@ -631,9 +634,9 @@
 
     function addSolarSystem() {
       const system = new THREE.Group();
-      system.position.set(-2.2, 1.6, -14.5);
-      system.scale.setScalar(.92);
-      system.rotation.x = -.16;
+      system.position.set(-1.4, 6.35, -23);
+      system.scale.setScalar(.62);
+      system.rotation.x = Math.PI / 2;
 
       const sun = new THREE.Mesh(new THREE.SphereGeometry(.56, 28, 20), glowMaterial(0xffb45f, 2.8));
       system.add(sun);
@@ -673,7 +676,7 @@
         system.add(pivot);
         pivots.push({ pivot, speed });
       });
-      scene.add(system);
+      celestialRig.add(system);
       return { system, sun, pivots };
     }
 
@@ -690,14 +693,14 @@
       );
       group.add(line, dots);
       group.position.set(...position);
-      scene.add(group);
+      celestialRig.add(group);
       return { group, line, dots };
     }
 
     const constellations = [
-      addConstellation([[-1.6,.1],[-.9,.55],[-.2,.3],[.45,.82],[1.1,.5],[1.55,1.02]], 0x8ed6ff, [-9.2, 2.5, -15.5], .9),
-      addConstellation([[-1.2,.9],[-.65,.1],[0,.55],[.7,-.15],[1.25,.35],[.55,1.02],[-.15,.55]], 0xd8bdff, [7.2, 2.2, -16], .82),
-      addConstellation([[-1.4,.35],[-.62,.75],[.05,.12],[.72,.6],[1.38,.16]], 0xffd58c, [1.2, 4.2, -17], .72)
+      addConstellation([[-1.6,.1],[-.9,.55],[-.2,.3],[.45,.82],[1.1,.5],[1.55,1.02]], 0x8ed6ff, [-7.4, 4.4, -22], .9),
+      addConstellation([[-1.2,.9],[-.65,.1],[0,.55],[.7,-.15],[1.25,.35],[.55,1.02],[-.15,.55]], 0xd8bdff, [7.2, 3.8, -24], .82),
+      addConstellation([[-1.4,.35],[-.62,.75],[.05,.12],[.72,.6],[1.38,.16]], 0xffd58c, [1.2, 7.3, -26], .72)
     ];
 
     function addComet() {
@@ -711,9 +714,9 @@
         new THREE.LineBasicMaterial({ color: 0x8bdcff, transparent: true, opacity: .68, depthWrite: false })
       );
       comet.add(tail);
-      comet.position.set(-9, 4.2, -15);
+      comet.position.set(-8, 5.4, -24);
       comet.rotation.z = -.35;
-      scene.add(comet);
+      celestialRig.add(comet);
       return comet;
     }
     const comet = addComet();
@@ -727,8 +730,8 @@
       const head = new THREE.Mesh(new THREE.SphereGeometry(.045, 9, 7), glowMaterial(index % 2 ? 0xffb878 : 0xa9ecff, 2.4));
       meteor.add(streak, head);
       meteor.userData.phase = index * 4.1;
-      meteor.position.set(-11 + index * 7, 4.5 + index * .4, -14 - index * 2);
-      scene.add(meteor);
+      meteor.position.set(-10 + index * 7, 5.5 + index * .4, -23 - index * 2);
+      celestialRig.add(meteor);
       return meteor;
     }
     const meteors = [0, 1, 2].map(addMeteor);
@@ -1447,13 +1450,13 @@
         solarSystem.sun.rotation.y += delta * .18;
         solarSystem.pivots.forEach(({ pivot, speed }) => { pivot.rotation.y += delta * speed * .22; });
         const cometTime = now * .000085;
-        comet.position.set(Math.sin(cometTime) * 11, 4.1 + Math.sin(cometTime * 2) * .9, -15 + Math.cos(cometTime) * 3.5);
+        comet.position.set(Math.sin(cometTime) * 9.5, 5.2 + Math.sin(cometTime * 2) * .9, -24 + Math.cos(cometTime) * 2.4);
         comet.rotation.z = Math.atan2(Math.cos(cometTime * 2) * 2.6, Math.cos(cometTime) * 11) + Math.PI;
         meteors.forEach((meteor, index) => {
           const cycle = (now * .000055 + index * .31) % 1;
           const flight = cycle / .32;
           meteor.visible = cycle < .32;
-          meteor.position.set(-13 + flight * 27, 5.8 - flight * 3.3 + index * .45, -14 - index * 2.4);
+          meteor.position.set(-12 + flight * 24, 7.6 - flight * 3.2 + index * .45, -23 - index * 1.5);
           meteor.materialOpacity = Math.sin(Math.min(1, flight) * Math.PI);
           meteor.children.forEach(child => { if (child.material) child.material.opacity = .78 * Math.sin(Math.min(1, flight) * Math.PI); });
         });
