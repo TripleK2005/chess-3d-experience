@@ -58,7 +58,7 @@
       backdrop-filter: blur(10px); transition: opacity .2s ease, transform .2s ease;
     }
     .player.active { transform: translateY(-4px); }
-    .player.white { right: clamp(18px, 2.6vw, 34px); top: 98px; color: var(--magnus); text-align: right; }
+    .player.white { right: clamp(18px, 2.6vw, 34px); top: 132px; color: var(--magnus); text-align: right; }
     .player.black { left: clamp(18px, 2.6vw, 34px); bottom: 112px; color: var(--hikaru); }
     .player-name { color: var(--paper); font-weight: 700; font-size: 1rem; }
     .player-meta { color: var(--muted); font-size: .78rem; margin-top: 2px; }
@@ -157,7 +157,7 @@
       <h1>Bilbao<br />Masters 2016</h1>
       <p>Round 1 · 13 July · Game replay</p>
     </div>
-    <div class="result-chip">0—1</div>
+    <div class="result-chip">1—0</div>
   </header>
   <a class="site-switch" href="https://nocturne-chess-3d.huyhaoanh6.chatgpt.site" aria-label="Chuyển sang Nocturne Chess">♞ Nocturne Chess</a>
 
@@ -465,7 +465,7 @@
 
     function updateUI() {
       const current=masterMoves[ply-1];
-      moveNow.textContent=ply===0?'Bắt đầu':ply===masterMoves.length?'0—1 · Nakamura thắng':`${Math.ceil(ply/2)}${current.color==='w'?'.':'…'} ${current.san}`;
+      moveNow.textContent=ply===0?'Bắt đầu':ply===masterMoves.length?'1—0 · Nakamura thắng':`${Math.ceil(ply/2)}${current.color==='w'?'.':'…'} ${current.san}`;
       moveCount.textContent=`${ply} / ${masterMoves.length} ply`;
       whiteClock.textContent=`Đã bấm ${Math.ceil(ply/2)} lần`;
       blackClock.textContent=`Đã bấm ${Math.floor(ply/2)} lần`;
