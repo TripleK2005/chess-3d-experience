@@ -181,7 +181,9 @@
       top: 50%;
       right: 92px;
       z-index: 12;
-      width: min(292px, calc(100vw - 36px));
+      width: min(340px, calc(100vw - 36px));
+      max-height: min(78vh, 650px);
+      overflow: auto;
       padding: 18px;
       transform: translateY(-50%);
       border: 1px solid rgba(203, 161, 91, .42);
@@ -385,10 +387,14 @@
       <button class="avatar-tab" type="button" data-avatar-side="black">Quân đen</button>
     </div>
     <div class="avatar-fields">
-      <label>Tóc<select id="hairSelect"><option value="classic">Classic</option><option value="curly">Curly</option></select></label>
-      <label>Áo<select id="jacketSelect"><option value="navy">Navy suit</option><option value="burgundy">Burgundy</option></select></label>
-      <label>Giày<select id="shoesSelect"><option value="black">Black leather</option><option value="white">White sneaker</option></select></label>
-      <label>Ghế<select id="chairSelect"><option value="teal">Teal</option><option value="red">Crimson</option></select></label>
+      <label>Tóc<select id="hairSelect"><option value="classic">Classic</option><option value="curly">Curly</option><option value="fade">Low fade</option><option value="bun">Man bun</option></select></label>
+      <label>Áo khoác<select id="jacketSelect"><option value="navy">Navy suit</option><option value="burgundy">Burgundy</option><option value="emerald">Emerald</option><option value="ivory">Ivory</option></select></label>
+      <label>Sơ mi<select id="shirtSelect"><option value="cream">Cream</option><option value="black">Midnight</option><option value="blue">Sky blue</option><option value="gold">Champagne</option></select></label>
+      <label>Quần<select id="pantsSelect"><option value="matching">Đồng bộ áo</option><option value="charcoal">Charcoal</option><option value="camel">Camel</option><option value="ivory">Ivory</option></select></label>
+      <label>Giày<select id="shoesSelect"><option value="black">Black leather</option><option value="white">White sneaker</option><option value="brown">Brown Oxford</option><option value="red">Red sneaker</option></select></label>
+      <label>Phụ kiện<select id="accessorySelect"><option value="none">Không</option><option value="glasses">Kính</option><option value="pocket">Khăn túi</option><option value="both">Kính + khăn</option></select></label>
+      <label>Kiểu ghế<select id="chairStyleSelect"><option value="club">Club chair</option><option value="classic">Classic</option><option value="executive">Executive</option></select></label>
+      <label>Màu ghế<select id="chairSelect"><option value="teal">Teal</option><option value="red">Crimson</option><option value="leather">Cognac</option><option value="slate">Slate</option></select></label>
     </div>
     <button class="randomize-avatar" id="randomizeAvatar" type="button">Random outfit</button>
   </aside>
@@ -434,7 +440,11 @@
     const customizerClose = document.querySelector('#customizerClose');
     const hairSelect = document.querySelector('#hairSelect');
     const jacketSelect = document.querySelector('#jacketSelect');
+    const shirtSelect = document.querySelector('#shirtSelect');
+    const pantsSelect = document.querySelector('#pantsSelect');
     const shoesSelect = document.querySelector('#shoesSelect');
+    const accessorySelect = document.querySelector('#accessorySelect');
+    const chairStyleSelect = document.querySelector('#chairStyleSelect');
     const chairSelect = document.querySelector('#chairSelect');
     const randomizeAvatar = document.querySelector('#randomizeAvatar');
     const prefersReducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -619,13 +629,15 @@
       return m;
     }
     const avatarCatalog = {
-      jackets: { navy: 0x17263b, burgundy: 0x5f2432 },
-      shoes: { black: 0x11151a, white: 0xe7e4df },
-      chairs: { teal: 0x1c6570, red: 0x7c2738 }
+      jackets: { navy: 0x17263b, burgundy: 0x5f2432, emerald: 0x164c43, ivory: 0xc9c1ae },
+      shirts: { cream: 0xe6e2d8, black: 0x161a20, blue: 0x86afc8, gold: 0xd0b77d },
+      pants: { charcoal: 0x252a31, camel: 0x8a6547, ivory: 0xc9c1ae },
+      shoes: { black: 0x11151a, white: 0xe7e4df, brown: 0x5b321f, red: 0x8c2638 },
+      chairs: { teal: 0x1c6570, red: 0x7c2738, leather: 0x8a4d27, slate: 0x3c4653 }
     };
     const defaultAvatarConfig = {
-      white: { hair: 'curly', jacket: 'navy', shoes: 'white', chair: 'teal' },
-      black: { hair: 'classic', jacket: 'burgundy', shoes: 'black', chair: 'red' }
+      white: { hair: 'curly', jacket: 'navy', shirt: 'cream', pants: 'matching', shoes: 'white', accessory: 'pocket', chairStyle: 'club', chair: 'teal' },
+      black: { hair: 'classic', jacket: 'burgundy', shirt: 'cream', pants: 'charcoal', shoes: 'black', accessory: 'none', chairStyle: 'classic', chair: 'red' }
     };
     function cloneDefaultAvatarConfig() {
       return { white: { ...defaultAvatarConfig.white }, black: { ...defaultAvatarConfig.black } };
@@ -649,6 +661,7 @@
       const frameMat = new THREE.MeshStandardMaterial({ color: 0x111820, roughness: .42, metalness: .56 });
       const chairMat = new THREE.MeshPhysicalMaterial({ color: 0x1c6570, roughness: .62, clearcoat: .2 });
       const jacketMat = new THREE.MeshPhysicalMaterial({ color: 0x17263b, roughness: .68, sheen: .32 });
+      const pantsMat = new THREE.MeshPhysicalMaterial({ color: 0x17263b, roughness: .72, sheen: .18 });
       const shirtMat = new THREE.MeshStandardMaterial({ color: 0xe6e2d8, roughness: .8 });
       const skinMat = new THREE.MeshPhysicalMaterial({ color: side === 'white' ? 0xd7a17c : 0xca9672, roughness: .78 });
       const hairMat = new THREE.MeshStandardMaterial({ color: side === 'white' ? 0x6a4632 : 0x17191c, roughness: .9 });
@@ -657,6 +670,13 @@
       const chair = new THREE.Group();
       const seat = mesh(new THREE.BoxGeometry(2.1, .3, 1.75), chairMat, .82); chair.add(seat);
       const back = mesh(new THREE.BoxGeometry(2.12, 2.25, .28), chairMat, 1.86); back.position.z = -.82; chair.add(back);
+      const headrest = mesh(new THREE.BoxGeometry(1.7, .62, .34), chairMat, 3.05); headrest.position.z = -.84; chair.add(headrest);
+      const chairArms = new THREE.Group();
+      for (const x of [-1.02, 1.02]) {
+        const arm = mesh(new THREE.BoxGeometry(.2, .18, 1.48), chairMat, 1.48); arm.position.set(x, 1.48, .08); chairArms.add(arm);
+        const support = mesh(new THREE.BoxGeometry(.16, .72, .16), frameMat, 1.14); support.position.set(x, 1.14, .38); chairArms.add(support);
+      }
+      chair.add(chairArms);
       for (const x of [-.82, .82]) for (const z of [-.62, .62]) {
         const leg = mesh(new THREE.CylinderGeometry(.075, .095, .95, 10), frameMat, .36);
         leg.position.set(x, .36, z); chair.add(leg);
@@ -679,12 +699,22 @@
       const curls = [[-.42,3.78,.16],[0,3.92,.12],[.42,3.78,.16],[-.25,3.96,.2],[.25,3.96,.2],[-.5,3.58,.08],[.5,3.58,.08]];
       for (const [x,y,z] of curls) { const curl = mesh(new THREE.SphereGeometry(.19, 14, 10), hairMat, y); curl.position.set(x,y,z); curlyHair.add(curl); }
       root.add(curlyHair);
+      const fadeHair = new THREE.Group();
+      const fadeCap = mesh(new THREE.SphereGeometry(.535, 20, 12, 0, Math.PI * 2, 0, Math.PI * .43), hairMat, 3.76); fadeCap.scale.y = .65; fadeHair.add(fadeCap); root.add(fadeHair);
+      const bunHair = new THREE.Group();
+      const bunCap = mesh(new THREE.SphereGeometry(.55, 20, 12, 0, Math.PI * 2, 0, Math.PI * .58), hairMat, 3.72); bunHair.add(bunCap);
+      const bun = mesh(new THREE.SphereGeometry(.25, 16, 12), hairMat, 3.72); bun.position.z = -.48; bunHair.add(bun); root.add(bunHair);
 
       const eyeMat = new THREE.MeshStandardMaterial({ color: 0x17191c });
       for (const x of [-.18, .18]) {
         const eye = mesh(new THREE.SphereGeometry(.045, 10, 8), eyeMat, 3.5);
         eye.position.set(x, 3.5, .48); root.add(eye);
       }
+      const glasses = new THREE.Group();
+      const glassesMat = new THREE.MeshStandardMaterial({ color: 0xcba15b, metalness: .9, roughness: .22 });
+      for (const x of [-.2, .2]) { const lens = mesh(new THREE.TorusGeometry(.13, .018, 8, 18), glassesMat, 3.5); lens.position.set(x, 3.5, .5); glasses.add(lens); }
+      const bridge = mesh(new THREE.BoxGeometry(.13, .025, .025), glassesMat, 3.5); bridge.position.z = .5; glasses.add(bridge); root.add(glasses);
+      const pocketSquare = mesh(new THREE.ConeGeometry(.1, .24, 3), shirtMat, 2.55); pocketSquare.position.set(.38, 2.55, .68); pocketSquare.rotation.z = Math.PI; root.add(pocketSquare);
       for (const x of [-.72, .72]) {
         const upper = mesh(new THREE.CylinderGeometry(.14, .18, .82, 12), jacketMat, 2.54);
         upper.position.set(x, 2.54, .24); upper.rotation.x = -.62; upper.rotation.z = x < 0 ? -.18 : .18; root.add(upper);
@@ -694,15 +724,15 @@
         hand.position.set(x * .86, 1.62, .34); hand.scale.set(.82, 1.08, .76); root.add(hand);
       }
       for (const x of [-.4, .4]) {
-        const thigh = mesh(new THREE.CylinderGeometry(.2, .25, 1.05, 12), jacketMat, 1.08);
+        const thigh = mesh(new THREE.CylinderGeometry(.2, .25, 1.05, 12), pantsMat, 1.08);
         thigh.position.set(x, 1.08, .38); thigh.rotation.x = Math.PI / 2.7; root.add(thigh);
-        const shin = mesh(new THREE.CylinderGeometry(.16, .2, 1.02, 12), jacketMat, .46);
+        const shin = mesh(new THREE.CylinderGeometry(.16, .2, 1.02, 12), pantsMat, .46);
         shin.position.set(x, .46, .92); root.add(shin);
         const shoe = mesh(new THREE.BoxGeometry(.42, .23, .72, 2, 2, 3), shoeMat, -.02);
         shoe.position.set(x, -.02, 1.2); root.add(shoe);
       }
 
-      root.userData = { chairMat, jacketMat, shoeMat, classicHair, curlyHair, head, baseY: -1.49 };
+      root.userData = { chairMat, jacketMat, pantsMat, shirtMat, shoeMat, classicHair, curlyHair, fadeHair, bunHair, glasses, pocketSquare, back, headrest, chairArms, head, baseY: -1.49 };
       root.position.set(0, root.userData.baseY, side === 'white' ? -7.25 : 7.25);
       root.rotation.y = side === 'white' ? 0 : Math.PI;
       root.scale.setScalar(.82);
@@ -714,10 +744,20 @@
     function applyAvatarStyle(side) {
       const actor = avatarActors[side], config = avatarConfig[side], parts = actor.userData;
       parts.jacketMat.color.setHex(avatarCatalog.jackets[config.jacket]);
+      parts.shirtMat.color.setHex(avatarCatalog.shirts[config.shirt]);
+      parts.pantsMat.color.setHex(config.pants === 'matching' ? avatarCatalog.jackets[config.jacket] : avatarCatalog.pants[config.pants]);
       parts.shoeMat.color.setHex(avatarCatalog.shoes[config.shoes]);
       parts.chairMat.color.setHex(avatarCatalog.chairs[config.chair]);
       parts.classicHair.visible = config.hair === 'classic';
       parts.curlyHair.visible = config.hair === 'curly';
+      parts.fadeHair.visible = config.hair === 'fade';
+      parts.bunHair.visible = config.hair === 'bun';
+      parts.glasses.visible = config.accessory === 'glasses' || config.accessory === 'both';
+      parts.pocketSquare.visible = config.accessory === 'pocket' || config.accessory === 'both';
+      parts.chairArms.visible = config.chairStyle !== 'classic';
+      parts.headrest.visible = config.chairStyle === 'executive';
+      parts.back.scale.y = config.chairStyle === 'executive' ? 1.28 : config.chairStyle === 'classic' ? .9 : 1;
+      parts.back.position.y = config.chairStyle === 'executive' ? 2.12 : config.chairStyle === 'classic' ? 1.68 : 1.86;
     }
     applyAvatarStyle('white');
     applyAvatarStyle('black');
@@ -727,7 +767,11 @@
       const config = avatarConfig[activeAvatarSide];
       hairSelect.value = config.hair;
       jacketSelect.value = config.jacket;
+      shirtSelect.value = config.shirt;
+      pantsSelect.value = config.pants;
       shoesSelect.value = config.shoes;
+      accessorySelect.value = config.accessory;
+      chairStyleSelect.value = config.chairStyle;
       chairSelect.value = config.chair;
       document.querySelectorAll('[data-avatar-side]').forEach(button => button.classList.toggle('active', button.dataset.avatarSide === activeAvatarSide));
     }
@@ -738,7 +782,11 @@
     }
     hairSelect.addEventListener('change', () => updateActiveAvatar('hair', hairSelect.value));
     jacketSelect.addEventListener('change', () => updateActiveAvatar('jacket', jacketSelect.value));
+    shirtSelect.addEventListener('change', () => updateActiveAvatar('shirt', shirtSelect.value));
+    pantsSelect.addEventListener('change', () => updateActiveAvatar('pants', pantsSelect.value));
     shoesSelect.addEventListener('change', () => updateActiveAvatar('shoes', shoesSelect.value));
+    accessorySelect.addEventListener('change', () => updateActiveAvatar('accessory', accessorySelect.value));
+    chairStyleSelect.addEventListener('change', () => updateActiveAvatar('chairStyle', chairStyleSelect.value));
     chairSelect.addEventListener('change', () => updateActiveAvatar('chair', chairSelect.value));
     document.querySelectorAll('[data-avatar-side]').forEach(button => button.addEventListener('click', () => {
       activeAvatarSide = button.dataset.avatarSide; syncAvatarCustomizer();
@@ -752,10 +800,14 @@
     randomizeAvatar.addEventListener('click', () => {
       const pick = values => values[Math.floor(Math.random() * values.length)];
       avatarConfig[activeAvatarSide] = {
-        hair: pick(['classic', 'curly']),
-        jacket: pick(['navy', 'burgundy']),
-        shoes: pick(['black', 'white']),
-        chair: pick(['teal', 'red'])
+        hair: pick(['classic', 'curly', 'fade', 'bun']),
+        jacket: pick(['navy', 'burgundy', 'emerald', 'ivory']),
+        shirt: pick(['cream', 'black', 'blue', 'gold']),
+        pants: pick(['matching', 'charcoal', 'camel', 'ivory']),
+        shoes: pick(['black', 'white', 'brown', 'red']),
+        accessory: pick(['none', 'glasses', 'pocket', 'both']),
+        chairStyle: pick(['club', 'classic', 'executive']),
+        chair: pick(['teal', 'red', 'leather', 'slate'])
       };
       applyAvatarStyle(activeAvatarSide); saveAvatarConfig(); syncAvatarCustomizer();
     });
